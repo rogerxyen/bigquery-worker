@@ -25,8 +25,12 @@ async function handleRequest(request: Request): Promise<Response> {
   try {
     // Fetch and send initial data (no timestamp provided initially)
     const initialData = await fetchData(symbols, lastFetchedTimestamp);
-    const initialMessage = JSON.stringify(initialData);
-    server.send(initialMessage);
+
+    // Send each record individually from the initial batch (max 10000 records)
+    initialData.data.forEach(record => {
+      const recordMessage = JSON.stringify(record);
+      server.send(recordMessage);  // Send each record one by one
+    });
 
     // Log the first batch and the initial timestamp
     console.log("Initial batch of data:", initialData);
@@ -37,11 +41,16 @@ async function handleRequest(request: Request): Promise<Response> {
         console.log(`Calling API with lastFetchedTimestamp: ${lastFetchedTimestamp} at ${new Date().toLocaleString()}`);
         
         const updateData = await fetchData(symbols, lastFetchedTimestamp);
-        const updateMessage = JSON.stringify(updateData);
 
+        // Send each new record individually from the update
+        updateData.data.forEach(record => {
+          const updateMessage = JSON.stringify(record);
+          connections.forEach(conn => conn.send(updateMessage));  // Send each record one by one
+        });
+
+        // Log the data received from the API
         console.log("Data received from API:", updateData);
 
-        connections.forEach(conn => conn.send(updateMessage));
       } catch (error) {
         console.error("Failed to send updates:", error);
       }
