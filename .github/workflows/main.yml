@@ -24,9 +24,9 @@ jobs:
       - name: Install Wrangler CLI
         run: npm install -g wrangler
 
-      # Step 4: Authenticate Wrangler using Cloudflare API Token
+      # Step 4: Authenticate Wrangler with Cloudflare API Token
       - name: Authenticate Wrangler
-        run: wrangler login --api-token ${{ secrets.CF_API_TOKEN }}
+        run: wrangler config --api-token ${{ secrets.CF_API_TOKEN }}
 
       # Step 5: Deploy to Cloudflare Worker
       - name: Deploy to Cloudflare Worker
