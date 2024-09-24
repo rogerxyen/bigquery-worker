@@ -1,0 +1,5 @@
+name = "bigquery-worker"
+type = "webpack"
+account_id = "601235da34352d56a7fc81c7a99c5d9c"
+compatibility_date = "2024-08-19"
+main = "index.ts" 

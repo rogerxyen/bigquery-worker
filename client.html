@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #data-display { margin-top: 20px; background-color: #f4f4f4; padding: 10px; border-radius: 5px; min-height: 50px; white-space: pre-wrap; }
+        #update-message { color: green; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    <label for="symbols">Enter Symbols (comma-separated):</label>
+    <input type="text" id="symbols" placeholder="e.g., AAPL, GOOGL">
+    <button onclick="startWebSocket()">Start WebSocket</button>
+    
+    <div id="update-message">Waiting for update...</div>
+    <div id="data-display">Waiting for data...</div>
+
+    <script>
+        let ws;
+
+        function startWebSocket() {
+            const symbols = document.getElementById('symbols').value;
+            let url = 'wss://bigquery-worker.engineering-601.workers.dev/';
+
+            if (symbols) {
+                url += `?symbols=${encodeURIComponent(symbols)}`;
+            }
+
+            ws = new WebSocket(url);
+
+            ws.onopen = function() {
+                console.log("WebSocket connection opened.");
+            };
+
+            ws.onmessage = function(event) {
+                console.log("Message received from server: ", event.data);
+                const data = JSON.parse(event.data);
+                const display = document.getElementById('data-display');
+
+                let formattedData = '';
+                data.data.forEach(entry => {
+                    formattedData += `${JSON.stringify(entry)}\n`;
+                });
+
+                display.innerHTML = `<pre>${formattedData}</pre>` + display.innerHTML;
+                document.getElementById('update-message').textContent = 'Data just updated!';
+
+                setTimeout(() => {
+                    document.getElementById('update-message').textContent = 'Waiting for update...';
+                }, 5000);
+            };
+
+            ws.onerror = function(event) {
+                console.error("WebSocket error observed:", event);
+            };
+
+            ws.onclose = function(event) {
+                console.log("WebSocket connection closed", event);
+            };
+        }
+    </script>
+</body>
+</html>
